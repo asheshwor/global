@@ -1,0 +1,181 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_notebook: default
+---
+
+This code converts UN migrant stock data to be used in Gephi for network analysis and visualisation. First, it extracts the UN stock migrants data from excel file. Then, The country names are converted to two-digit codes. Finally, the source-destination data is exported as csv files.
+
+Load packages.
+
+```{r echo=FALSE}
+library(readxl)
+library(tidyverse)
+library(reshape2)
+```
+## Read data
+
+The data comes fom UN's "International migrant stock: The 2017 revision". The total stock data comes from Table 1 tab in the data "Origin and destination" excel file [http://www.un.org/en/development/desa/population/migration/data/estimates2/data/UN_MigrantStockByOriginAndDestination_2017.xlsx]. It must be noted that the earlier version of the data had different tabs for each year the data was available, whereas the current version has the data for all years in Table 1. 
+
+```{r}
+dataloc <- "C:/Users/Lenovo/github/global/data/UN_MigrantStockByOriginAndDestination_2017.xlsx"
+clist <- "C:/Users/Lenovo/github/global/data/countriesun.xlsx"
+countries <- read_excel(clist, sheet="UN")
+data2017 <- read_xlsx(dataloc, sheet = "Table 1", skip = 15, na = "..",
+                       col_names = TRUE,
+                       col_types = c("numeric", "skip", "text", "skip",
+                                     "numeric",
+                                     rep("skip", 4),
+                                     rep("numeric", 232))) #gives a warning
+data2017 <- data2017 %>%
+  filter(X__3 < 900)
+```
+Next, convert the country/place names to two-character codes. The list of all regions are provided in the same excel file. However, the codes have to be linked.
+
+```{r eval=FALSE}
+#classifications of countries and areas
+countries.un <- read_xlsx(dataloc, sheet = "ANNEX", skip = 15,
+                       col_types = c("numeric", "text", "skip", "numeric",
+                                     rep("text", 9)))
+#filter only countries
+countries.un <- countries.un %>%
+  filter(Code < 900)
+#read codes from comtrade dataset
+datacomtrade <- "C:/Users/Lenovo/github/global/data/Comtrade Country Code and ISO list.xlsx"
+countries.iso <- read_xlsx(datacomtrade, sheet = 1, skip = 0,
+                       col_types = c("numeric", rep("text", 5), "skip", "skip"))
+```
+
+```{r eval=FALSE}
+data2015 <- read_excel(dataloc, sheet = "Table 16", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+```
+
+Functions
+
+```{r}
+#* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#*     Functions
+#* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+readMigrationTable <- function(xyear = 2013) {
+  data2015 <- read_excel(dataloc, sheet = "Table 16", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+  data2010 <- read_excel(dataloc, sheet = "Table 13", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+  data2005 <- read_excel(dataloc, sheet = "Table 10", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+  data2000 <- read_excel(dataloc, sheet = "Table 7", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+  data1995 <- read_excel(dataloc, sheet = "Table 4", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+  data1990 <- read_excel(dataloc, sheet = "Table 1", skip = 15,
+                       col_types = c("skip", "text", "skip", "numeric",
+                                     rep("skip", 4), rep("numeric", 232)))
+  #add datayear column
+  data2015$datayear <- 2015
+  data2010$datayear <- 2010
+  data2005$datayear <- 2005
+  data2000$datayear <- 2000
+  data1995$datayear <- 1995
+  data1990$datayear <- 1990
+  data <- rbind(data2015, data2010, data2005, data2000, data1995, data1990)
+  return(data)
+}
+## match with country codes
+getCountryCode <- function(xcountry="Nepal") {
+  #usage getCountryCode("Australia") will return "AU"
+  code <- countries[countries$newname == xcountry,c("ISOCODE")]
+  if (is.na(code[1])) {
+    return(NA)
+  } else {
+    return(as.character(code[1]))
+  }
+}
+```
+```{r}
+getCountryCode <- function(xcountry="Nepal") {
+    #usage getCountryCode("Australia") will return "AU"
+    code <- countries[countries$newname == xcountry,c("ISOCODE")]
+    if (is.na(code[1])) {
+      return(NA)
+    } else {
+      return(as.character(code[1]))
+    }
+  }
+  ## match with country codes
+  getCountryName <- function(xcountry="NP") {
+    #usage getCountryName("AU") will return "Australia"
+    code <- countries[countries$ISOCODE == xcountry, c("COUNTRY_UN")]
+    if (is.na(code[1])) {
+      return(NA)
+    } else {
+      return(as.character(code[1]))
+    }
+  }
+```
+
+Clean UN data
+
+```{r}
+  # data2015 <- readMigrationTable() #not only for 2013 though
+data2015 <- data2017
+  # data2015 <- data2015[data2015$X__3 < 900,] #isolate countries only
+#process country names
+  countries$newname <- chartr("'", " ", countries$COUNTRY_UN)
+  countries$newname <- chartr("(", " ", countries$newname)
+  countries$newname <- chartr(")", " ", countries$newname)
+  countries$newname <- chartr("-", " ", countries$newname)
+  countries$newname <- chartr(".", " ", countries$newname)
+  countries$newname <- gsub("\\s","", chartr(",", " ", countries$newname))
+  #convert col names to country ISCOCODEs
+  oldnames <- names(data2015)
+  oldnames <- chartr("'", " ", oldnames)
+    oldnames <- chartr("(", " ", oldnames)
+      oldnames <- chartr(")", " ", oldnames)
+        oldnames <- chartr("-", " ", oldnames)
+                oldnames <- chartr(",", " ", oldnames)
+  newnames <- chartr(".", " ", oldnames) #replace . with space
+  newnames <- gsub("\\s","", newnames) #final names to match
+  countries$ISOCODE <- as.character(countries$ISOCODE)
+  newnames2 <- sapply(newnames[4:length(newnames)], getCountryCode)
+  # newnames2[is.na(newnames2)] <- oldnames[is.na(newnames2)]
+  names(data2015) <- c("datayear", "name" , "ccode", newnames2)
+  data2015$newname <- chartr("'", " ", data2015$name)
+  data2015$newname <- chartr("(", " ", data2015$newname)
+  data2015$newname <- chartr(")", " ", data2015$newname)
+  data2015$newname <- chartr("-", " ", data2015$newname)
+  data2015$newname <- chartr(".", " ", data2015$newname)
+  data2015$newname <- gsub("\\s","", chartr(",", " ", data2015$newname))
+  data2015$ISOCODE <- sapply(data2015$newname, getCountryCode)
+  #melt data
+  data2015.sub <- data2015[ , c(-2,-3)]
+  m2015 <- melt(data2015.sub, c("newname", "ISOCODE", "datayear"),
+                names(data2015)[4:235],
+                value.name = "STOCK")
+  names(m2015) <- c("newname", "source", "year", "destination", "stock")
+  m2015 <- m2015[complete.cases(m2015),]
+  # m2015 <- m2015[m2015$datayear == 2015,]
+  write.csv(m2015, "stock data all.csv", na = "", row.names = FALSE)
+  # data2015 <- data2015[data2015$datayear == 2015,] #filter 2015 only
+  #sort
+  # data2015 <- data2015[order(data2015$ISOCODE), ]
+  # write.csv(data2015, "stock matrix 2015.csv", col.names = FALSE, na.)
+  # write.table(data2015, "stock matrix 2015b.csv",
+  #           na = "",
+  #           row.names = FALSE,
+  #           # col.names = FALSE,
+  #           # append = TRUE,
+  #           sep = ",")
+  head(countries)
+  write.csv(countries[ ,c(1:4)], "nodes.csv", row.names = FALSE)
+```
+
+
+
