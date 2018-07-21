@@ -177,5 +177,91 @@ data2015 <- data2017
   write.csv(countries[ ,c(1:4)], "nodes.csv", row.names = FALSE)
 ```
 
+Network graph using igraph
+
+```{r}
+nodes.au <- airports.au[,c("V5", "V2")]
+names(nodes.au) <- c("id", "airport")
+#make links
+links.au <- routes.au[, c("V3", "V5", "flights")]
+names(links.au) <- c("from", "to", "flights")
+library(igraph)
+net.au <- graph_from_data_frame(d=links.au, vertices=nodes.au, directed=TRUE) 
+# class(net)
+plot(net.au, edge.arrow.size=.4)
+# net.au.s <- simplify(net.au, remove.multiple = TRUE) 
+plot(net.au, edge.arrow.size=.4, edge.curved=.1,
+     vertex.label.color="black",
+     vertex.color="orange")
+#plotting
+# V(net.au)$color <- "cyan"
+E(net.au)$width <- E(net.au)$flights/2
+l <- layout_with_graphopt(net.au)
+plot(net.au, edge.arrow.size=.3, edge.curved=0.1,
+     edge.color = "darkgreen",
+     # vertex.frame.color="#555555",
+     # vertex.label=V(net)$media,
+     vertex.label.color="black",
+     vertex.label.cex=.9, vertex.shape="square",
+     layout=l)
+#centrality > degree
+degree(net.au, mode="in")
+centr_degree(net.au, mode="in", normalized=TRUE)
+library(RColorBrewer)
+pal <- brewer.pal(9, "Paired")
+pal2 <- brewer.pal(9, "Blues")
+plot(net.au, edge.arrow.size=.3, edge.curved=0.1,
+     edge.color = "grey30",
+     vertex.color=pal,
+     vertex.label.color="black",
+     vertex.label.cex=.9, vertex.shape="square",
+     layout=l)
+#visnetwork
+require(visNetwork, quietly = TRUE)
+data <- toVisNetworkData(net.au)
+visNetwork(nodes = data$nodes, edges = data$edges, height = "700px")
+visIgraph(net.au)
+
+visNetwork(nodes.au, links.au, height = "700px") %>%
+  visIgraphLayout() %>%
+  visNodes(size = 10)
+#all layouts
+layouts <- grep("^layout_", ls("package:igraph"), value=TRUE)[-1] 
+
+# Remove layouts that do not apply to our graph.
+
+layouts <- layouts[!grepl("bipartite|merge|norm|sugiyama|tree", layouts)]
+
+
+
+par(mfrow=c(3,5), mar=c(1,1,1,1))
+
+for (layout in layouts) {
+  
+  print(layout)
+  
+  l <- do.call(layout, list(net.au)) 
+  
+  plot(net.au, edge.arrow.mode=0, layout=l, main=layout) }
+#edge colour based on source
+tkid <- tkplot(net.au) #tkid is the id of the tkplot that will open
+
+l <- tkplot.getcoords(tkid) # grab the coordinates from tkplot
+
+tk_close(tkid, window.close = T)
+par(mfrow=c(1,1))
+plot(net.au, layout=l)
+#
+
+edge.start <- ends(net.au, es=E(net.au), names=F)[,1]
+
+edge.col <- V(net.au)$color[edge.start]
+
+plot(net, edge.color=edge.col, edge.curved=.1)  
+
+plot(net.au)
+```
+
+
 
 
