@@ -3,6 +3,8 @@ title: "R Notebook"
 output:
   word_document: default
   html_notebook: default
+editor_options: 
+  chunk_output_type: console
 ---
 
 This code converts UN migrant stock data to be used in Gephi for network analysis and visualisation. First, it extracts the UN stock migrants data from excel file. Then, The country names are converted to two-digit codes. Finally, the source-destination data is exported as csv files for visualisation in Gephi.
@@ -16,7 +18,7 @@ library(reshape2)
 ```
 ## Read data
 
-The data comes fom UN's "International migrant stock: The 2017 revision". The total stock data comes from Table 1 tab in the data "Origin and destination" excel file [http://www.un.org/en/development/desa/population/migration/data/estimates2/data/UN_MigrantStockByOriginAndDestination_2017.xlsx]. It must be noted that the earlier version of the data had different tabs for each year the data was available, whereas the current version has the data for all years in Table 1. 
+The data comes from UN's "International migrant stock: The 2017 revision". The total stock data comes from Table 1 tab in the data "Origin and destination" excel file [http://www.un.org/en/development/desa/population/migration/data/estimates2/data/UN_MigrantStockByOriginAndDestination_2017.xlsx]. It must be noted that the earlier version of the data had different tabs for each year the data was available, whereas the current version has the data for all years in Table 1. 
 
 ```{r}
 dataloc <- "C:/Users/Lenovo/github/global/data/UN_MigrantStockByOriginAndDestination_2017.xlsx"
@@ -31,6 +33,7 @@ data2017 <- read_xlsx(dataloc, sheet = "Table 1", skip = 15, na = "..",
 data2017 <- data2017 %>%
   filter(X__3 < 900)
 ```
+
 Next, convert the country/place names to two-character codes. The list of all regions are provided in the same excel file. However, the codes have to be linked.
 
 ```{r eval=FALSE}
@@ -44,19 +47,6 @@ countries.un <- countries.un %>%
 ```
 
 Functions
-
-```{r}
-## match with country codes
-getCountryCode <- function(xcountry="Nepal") {
-  #usage getCountryCode("Australia") will return "AU"
-  code <- countries[countries$newname == xcountry,c("ISOCODE")]
-  if (is.na(code[1])) {
-    return(NA)
-  } else {
-    return(as.character(code[1]))
-  }
-}
-```
 
 ```{r}
 getCountryCode <- function(xcountry="Nepal") {

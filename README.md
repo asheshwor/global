@@ -2,9 +2,13 @@
 
 # Mapping global connections
 
-Inspired by "Global Cities: α, β and γ tiers" map (Carta* & González 2010), we set out to visualize global connectivity using open data. First, we used airlines data from openflights.org to map airplane routes. Secondly, we mapped ....
+Inspired by "Global Cities: α, β and γ tiers" map (Carta* & González 2010), we set out to visualize global connectivity using open data.
 
-![Connections plot example](plots/chart01.png)
+For global migration network, we used UN migrant stock data from UN's "International migrant stock: The 2017 revision"[http://www.un.org/en/development/desa/population/migration/data/estimates2/data/UN_MigrantStockByOriginAndDestination_2017.xlsx] to map source and destination of migrants. The source-destination data was processed in R and exported as csv files for visualisation in Gephi.
+
+![Migration network visualisation using migrants stock data](plots/net01.png)
+
+For airlines data, we used openflights.org data to map airplane routes.
 
 ## Source code
 
@@ -12,11 +16,11 @@ Full source code is available from the following github repo: [https://github.co
 
 ## Attribution
 
-**Airlines data:** airlines route data and airports data from openflights.org [https://openflights.org/data.html](https://openflights.org/data.html)
+ **Migrant stock data:** "International migrant stock: The 2017 revision" - Table 1 tab in the data "Origin and destination" excel file [http://www.un.org/en/development/desa/population/migration/data/estimates2/data/UN_MigrantStockByOriginAndDestination_2017.xlsx]
+ 
+ **Airlines data:** airlines route data and airports data from openflights.org [https://openflights.org/data.html](https://openflights.org/data.html)
 
- **GDP data:** from UN
-
-## License:
+## License
 
 Code distributed under the terms of the [MIT license](https://github.com/asheshwor/global/blob/master/LICENSE).
 
@@ -24,4 +28,6 @@ See individual licenses for external data/tools used if any.
 
 ## References
 
-*  Carta, Silvio and González, Marta 2010, _Mapping Connectedness of Global Cities: α, β and γ tiers_ [http://www.lboro.ac.uk/gawc/visual/globalcities2010.html] http://www.lboro.ac.uk/gawc/visual/globalcities2010.html
+* Bastian M., Heymann S., Jacomy M. (2009). _Gephi: an open source software for exploring and manipulating networks._International AAAI Conference on Weblogs and Social Media.
+
+* Carta, Silvio and González, Marta (2010), _Mapping Connectedness of Global Cities: α, β and γ tiers_ [http://www.lboro.ac.uk/gawc/visual/globalcities2010.html] http://www.lboro.ac.uk/gawc/visual/globalcities2010.html
