@@ -16,6 +16,7 @@ library(readxl)
 library(tidyverse)
 library(reshape2)
 ```
+
 ## Read data
 
 The data comes from UN's "International migrant stock: The 2017 revision". The total stock data comes from Table 1 tab in the data "Origin and destination" excel file [http://www.un.org/en/development/desa/population/migration/data/estimates2/data/UN_MigrantStockByOriginAndDestination_2017.xlsx]. It must be noted that the earlier version of the data had different tabs for each year the data was available, whereas the current version has the data for all years in Table 1. 
@@ -131,7 +132,3 @@ net.au <- graph_from_data_frame(d = links.mig,
 # class(net)
 plot(net.au, edge.arrow.size=.2)
 ```
-
-
-
-
