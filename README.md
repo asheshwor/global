@@ -8,11 +8,11 @@ For global migration network, we used UN migrant stock data from UN's "Internati
 
 ![Migration network visualisation using migrants stock data](plots/net02.jpg)
 
-For airlines data, we used openflights.org data to map airplane routes.
+For airlines data, we used openflights.org data to map airplane routes. ... coming soon ...
 
 ## Source code
 
-Full source code is available from the following github repo: [https://github.com/asheshwor/global](https://github.com/asheshwor/global)
+Full source code is available from the following GitHub repo: [https://github.com/asheshwor/global](https://github.com/asheshwor/global)
 
 ## Attribution
 

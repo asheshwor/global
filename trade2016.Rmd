@@ -1,0 +1,92 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+# Trade flow matrix
+
+This code reads the BACI: International Trade Database at the Product-Level[http://www.cepii.fr/CEPII/en/publications/wp/abstract.asp?NoDoc=2726] dataset and prepares a matrix of international trade flows for network analysis.
+
+## Load packages
+
+```{r echo=FALSE}
+library(tidyverse)
+library(data.table)
+library(knitr)
+```
+# Read data
+
+Since the data is very large, we run this only once. For further analysis, we will use the subset for the latest year.
+
+```{r eval=FALSE}
+tradedata <- fread('D:/hanh data/trad_charact_0016.csv', header = T, sep = ',')
+tradedata <- tradedata %>%
+  filter(t == 2016)
+saveRDS(tradedata, file = "D:/R/2016data.RDS")
+```
+
+Reading prepared data.
+
+```{r echo=FALSE, results='asis'}
+tradedata <- readRDS("D:/R/2016data.RDS")
+kable(head(tradedata, 12), caption = "First twelve rows of data.")
+```
+## Data columns
+
+* t: Year of data
+* hs6: product HS96 revision
+* i: exporter code
+* j: importer code
+* u: unit value
+* trade_type:
+* GL:
+* price_range:
+
+Summarise by country pairs
+
+```{r echo=FALSE, results='asis'}
+#drop year column
+tradesum <- tradedata %>% 
+  select(-one_of("t")) %>% 
+  mutate(pair = paste0(i, "-", j)) %>% 
+  group_by(pair) %>% 
+  summarise(i = first(i), j = first(j), uvt = sum(uv, na.rm = TRUE)) %>% 
+  select(-one_of("pair"))
+# nrow(tradesum)
+# sum(is.na(tradesum$uvt))
+```
+
+```{r}
+kable(head(tradesum, 12), caption = "First twelve rows of summarised data.")
+```
+
+
+Save output to disk.
+
+```{r}
+write.csv(tradesum, "trade_summary.csv", row.names = FALSE)
+```
+
+## Total export by country
+
+```{r}
+exportsum <- tradedata %>% 
+  select(-one_of("t")) %>% 
+  group_by(i) %>% 
+  summarise(euvt = sum(uv, na.rm = TRUE)) 
+  # head(exportsum)
+importsum <- tradedata %>% 
+  select(-one_of("t")) %>% 
+  group_by(j) %>% 
+  summarise(iuvt = sum(uv, na.rm = TRUE))
+```
+
+
+Machine info
+
+```{r}
+sessionInfo()
+```
