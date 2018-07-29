@@ -20,6 +20,8 @@ Full source code is available from the following GitHub repo: [https://github.co
 
  **Airlines data:** airlines route data and airports data from openflights.org [https://openflights.org/data.html](https://openflights.org/data.html)
 
+ **World trade data:** BACI 2016 data [World trade database developed by the CEPII](http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=1)
+
 ## License
 
 Code distributed under the terms of the [MIT license](https://github.com/asheshwor/global/blob/master/LICENSE).
@@ -28,6 +30,6 @@ See individual licenses for external data/tools used if any.
 
 ## References
 
-* Bastian M., Heymann S., Jacomy M. (2009). _Gephi: an open source software for exploring and manipulating networks._International AAAI Conference on Weblogs and Social Media.
+* Bastian M., Heymann S., Jacomy M. (2009). _Gephi: an open source software for exploring and manipulating networks._ International AAAI Conference on Weblogs and Social Media.
 
 * Carta, Silvio and González, Marta (2010), _Mapping Connectedness of Global Cities: α, β and γ tiers_ [http://www.lboro.ac.uk/gawc/visual/globalcities2010.html] http://www.lboro.ac.uk/gawc/visual/globalcities2010.html
